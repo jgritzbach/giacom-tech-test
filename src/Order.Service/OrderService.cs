@@ -3,6 +3,7 @@ using Order.Model;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Order.Data.Entities;
 
 namespace Order.Service
 {
@@ -31,6 +32,11 @@ namespace Order.Service
         {
             var order = await _orderRepository.GetOrderByIdAsync(orderId);
             return order;
+        }
+
+        public async Task UpdateOrderStatusAsync(Guid orderId, string newState)
+        {
+            await _orderRepository.UpdateOrderStatusAsync(orderId, newState);
         }
     }
 }

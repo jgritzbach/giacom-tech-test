@@ -42,6 +42,7 @@ namespace Order.Data
 
         public async Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync()
         {
+
             // NOTE: This query shares a lot with GetOrdersAsync. Consider extracting common parts if more variants are added.
             var failedOrders = await _orderContext.Order
             .Include(x => x.Items)
@@ -100,6 +101,36 @@ namespace Order.Data
                 }).SingleOrDefaultAsync();
             
             return order;
+        }
+
+        /// <summary>
+        /// Assigns new OrderStatus (as a navigation property) to an Order entity
+        /// </summary>
+        /// <remarks>
+        /// The new OrderStatus is looked up by a name match
+        /// </remarks>
+        public async Task UpdateOrderStatusAsync(Guid orderId, string newState)
+        {
+            // try to find state in the db by its name 
+            var status = await _orderContext.OrderStatus
+                .SingleOrDefaultAsync(x => x.Name.ToLower() == newState.ToLower());
+
+            if (status == null)
+                throw new InvalidOperationException($"Status '{newState}' not found in the db.");
+
+            // find the order int the db
+            var orderIdBytes = orderId.ToByteArray();
+
+            var order = await _orderContext.Order
+                .Where(x => _orderContext.Database.IsInMemory() ? x.Id.SequenceEqual(orderIdBytes) : x.Id == orderIdBytes)
+                .SingleOrDefaultAsync();
+
+            if (order == null)
+                throw new InvalidOperationException($"Order with ID '{orderId}' not found.");
+
+            // set the new status to the order 
+            order.Status = status;
+            await _orderContext.SaveChangesAsync();
         }
     }
 }

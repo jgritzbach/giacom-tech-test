@@ -11,5 +11,6 @@ namespace Order.Data
         Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync();
 
         Task<OrderDetail> GetOrderByIdAsync(Guid orderId);
+        Task UpdateOrderStatusAsync(Guid orderId, string newState);
     }
 }

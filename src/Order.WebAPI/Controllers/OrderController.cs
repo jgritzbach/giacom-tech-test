@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Order.Data.Entities;
+using Order.Model;
 using Order.Service;
 using System;
 using System.Threading.Tasks;
@@ -50,5 +52,14 @@ namespace OrderService.WebAPI.Controllers
             }
         }
 
+        [HttpPatch("{orderId}")]
+        [Route("status")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateOrderStatusAsync(Guid orderId, OrderChangeStateDto dto)
+        {
+            await _orderService.UpdateOrderStatusAsync(orderId, dto.NewStatusName);
+            return Ok();
+        }
     }
 }
