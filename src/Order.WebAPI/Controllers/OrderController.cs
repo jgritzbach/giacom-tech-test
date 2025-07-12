@@ -69,8 +69,7 @@ namespace OrderService.WebAPI.Controllers
             }
         }
 
-        [HttpPatch("{orderId}")]
-        [Route("status")]
+        [HttpPatch("{orderId}/status")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateOrderStatusAsync(Guid orderId, OrderChangeStateDto dto)
