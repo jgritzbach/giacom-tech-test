@@ -10,6 +10,7 @@ namespace Order.Data
     public class OrderRepository : IOrderRepository
     {
         private readonly OrderContext _orderContext;
+        private readonly string failedStatus = "Failed";    // use private string to avoid magic value
 
         public OrderRepository(OrderContext orderContext)
         {
@@ -38,6 +39,33 @@ namespace Order.Data
 
             return orders;
         }
+
+        public async Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync()
+        {
+            // NOTE: This query shares a lot with GetOrdersAsync. Consider extracting common parts if more variants are added.
+            var failedOrders = await _orderContext.Order
+            .Include(x => x.Items)
+            .Include(x => x.Status)
+            .Where(x => x.Status.Name == this.failedStatus)
+            .Select(x => new OrderSummary
+            {
+                Id = new Guid(x.Id),
+                ResellerId = new Guid(x.ResellerId),
+                CustomerId = new Guid(x.CustomerId),
+                StatusId = new Guid(x.StatusId),
+                StatusName = x.Status.Name,
+                ItemCount = x.Items.Count,
+                TotalCost = x.Items.Sum(i => i.Quantity * i.Product.UnitCost).Value,
+                TotalPrice = x.Items.Sum(i => i.Quantity * i.Product.UnitPrice).Value,
+                CreatedDate = x.CreatedDate
+            })
+            .OrderByDescending(x => x.CreatedDate)
+            .ToListAsync();
+
+            return failedOrders;
+        }
+
+        
 
         public async Task<OrderDetail> GetOrderByIdAsync(Guid orderId)
         {

@@ -21,6 +21,12 @@ namespace Order.Service
             return orders;
         }
 
+        public async Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync()
+        {
+            var failedOrders = await _orderRepository.GetFailedOrdersAsync();
+            return failedOrders;
+        }
+
         public async Task<OrderDetail> GetOrderByIdAsync(Guid orderId)
         {
             var order = await _orderRepository.GetOrderByIdAsync(orderId);
