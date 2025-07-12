@@ -38,5 +38,10 @@ namespace Order.Service
         {
             await _orderRepository.UpdateOrderStatusAsync(orderId, newState);
         }
+
+        public async Task<Guid> CreateOrderAsync(OrderCreateDto dto)
+        {
+            return await _orderRepository.CreateOrderAsync(dto);
+        }
     }
 }

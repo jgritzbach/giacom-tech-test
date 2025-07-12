@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Order.Data.Entities;
 using Order.Model;
 using System;
 using System.Collections.Generic;
@@ -131,6 +132,42 @@ namespace Order.Data
             // set the new status to the order 
             order.Status = status;
             await _orderContext.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Async add new Order entity into the db. 
+        /// Do not allow non-existing Status navigation property (throw exception). 
+        /// </summary>
+        /// <remarks>
+        /// Non-existing Customer or Reseller should also not be allowed, but their entities are not part of this test-project at the moment
+        /// </remarks>
+        /// <returns>Id of the new order. </returns>
+        public async Task<Guid> CreateOrderAsync(OrderCreateDto dto)
+        {
+            var status = await _orderContext.OrderStatus
+                .FirstOrDefaultAsync(x => x.Id == dto.StatusId.ToByteArray());
+
+            if (status == null)
+                throw new InvalidOperationException($"Status '{dto.StatusId}' not found in the db.");
+
+            // TODO: Validate Reseller and Customer existence in DB once those entities are implemented (they were not part of the tech-test).
+            // For now, only Status is checked to avoid breaking the current test-project scope.
+
+            var newGuid = Guid.NewGuid();
+
+            var order = new Order.Data.Entities.Order
+            {
+                Id = newGuid.ToByteArray(),
+                ResellerId = dto.ResellerId.ToByteArray(),
+                CustomerId = dto.CustomerId.ToByteArray(),
+                CreatedDate = dto.CreatedDate,
+                Status = status
+            };
+
+            await _orderContext.Order.AddAsync(order);
+            await _orderContext.SaveChangesAsync();
+
+            return newGuid;
         }
     }
 }

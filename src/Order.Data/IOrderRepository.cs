@@ -1,4 +1,5 @@
-﻿using Order.Model;
+﻿using Order.Data.Entities;
+using Order.Model;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,5 +13,8 @@ namespace Order.Data
 
         Task<OrderDetail> GetOrderByIdAsync(Guid orderId);
         Task UpdateOrderStatusAsync(Guid orderId, string newState);
+
+        Task<Guid> CreateOrderAsync(OrderCreateDto dto);
+
     }
 }

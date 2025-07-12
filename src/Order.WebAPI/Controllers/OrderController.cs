@@ -61,5 +61,19 @@ namespace OrderService.WebAPI.Controllers
             await _orderService.UpdateOrderStatusAsync(orderId, dto.NewStatusName);
             return Ok();
         }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateOrderAsync(OrderCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var createdOrderId = await _orderService.CreateOrderAsync(dto);
+
+            // Return 201 Created with URI to the new order
+            return Ok(createdOrderId);
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace Order.Service
         
         Task<OrderDetail> GetOrderByIdAsync(Guid orderId);
         Task UpdateOrderStatusAsync(Guid orderId, string newState);
+        Task<Guid> CreateOrderAsync(OrderCreateDto dto);
     }
 }
