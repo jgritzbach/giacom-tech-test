@@ -4,6 +4,8 @@ using Order.Data.Entities;
 using Order.Model;
 using Order.Service;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OrderService.WebAPI.Controllers
@@ -34,6 +36,21 @@ namespace OrderService.WebAPI.Controllers
         {
             var failedOrders = await _orderService.GetFailedOrdersAsync();
             return Ok(failedOrders);
+        }
+
+        [HttpGet]
+        [Route("profit-by-month")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<OrderMonthlyProfitDto>>> GetProfitByMonthAsync()
+        {
+            var result = await _orderService.GetProfitByMonthAsync();
+
+            if (result == null || !result.Any())
+            {
+                return Ok(new List<OrderMonthlyProfitDto>());
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("{orderId}")]

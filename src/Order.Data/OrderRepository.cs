@@ -12,6 +12,7 @@ namespace Order.Data
     {
         private readonly OrderContext _orderContext;
         private readonly string failedStatus = "Failed";    // use private string to avoid magic value
+        private readonly string completedStatus = "Completed";
 
         public OrderRepository(OrderContext orderContext)
         {
@@ -44,30 +45,42 @@ namespace Order.Data
         public async Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync()
         {
 
-            // NOTE: This query shares a lot with GetOrdersAsync. Consider extracting common parts if more variants are added.
-            var failedOrders = await _orderContext.Order
-            .Include(x => x.Items)
-            .Include(x => x.Status)
-            .Where(x => x.Status.Name == this.failedStatus)
-            .Select(x => new OrderSummary
-            {
-                Id = new Guid(x.Id),
-                ResellerId = new Guid(x.ResellerId),
-                CustomerId = new Guid(x.CustomerId),
-                StatusId = new Guid(x.StatusId),
-                StatusName = x.Status.Name,
-                ItemCount = x.Items.Count,
-                TotalCost = x.Items.Sum(i => i.Quantity * i.Product.UnitCost).Value,
-                TotalPrice = x.Items.Sum(i => i.Quantity * i.Product.UnitPrice).Value,
-                CreatedDate = x.CreatedDate
-            })
-            .OrderByDescending(x => x.CreatedDate)
+            var failedOrders = await GetOrdersByStatusQuery(this.failedStatus)
             .ToListAsync();
 
             return failedOrders;
         }
 
-        
+        public async Task<IEnumerable<OrderSummary>> GetCompletedOrdersAsync()
+        {
+
+            var failedOrders = await GetOrdersByStatusQuery(this.completedStatus)
+            .ToListAsync();
+
+            return failedOrders;
+        }
+
+        private IQueryable<OrderSummary> GetOrdersByStatusQuery(string status)
+        {
+            return _orderContext.Order
+                .Include(x => x.Items)
+                .Include(x => x.Status)
+                .Where(x => x.Status.Name == status)
+                .Select(x => new OrderSummary
+                {
+                    Id = new Guid(x.Id),
+                    ResellerId = new Guid(x.ResellerId),
+                    CustomerId = new Guid(x.CustomerId),
+                    StatusId = new Guid(x.StatusId),
+                    StatusName = x.Status.Name,
+                    ItemCount = x.Items.Count,
+                    TotalCost = x.Items.Sum(i => i.Quantity * i.Product.UnitCost).Value,
+                    TotalPrice = x.Items.Sum(i => i.Quantity * i.Product.UnitPrice).Value,
+                    CreatedDate = x.CreatedDate
+                })
+                .OrderByDescending(x => x.CreatedDate);
+        }
+
 
         public async Task<OrderDetail> GetOrderByIdAsync(Guid orderId)
         {

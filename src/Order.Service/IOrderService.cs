@@ -10,7 +10,9 @@ namespace Order.Service
     {
         Task<IEnumerable<OrderSummary>> GetOrdersAsync();
         Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync();
-        
+        Task<List<OrderMonthlyProfitDto>> GetProfitByMonthAsync();
+
+
         Task<OrderDetail> GetOrderByIdAsync(Guid orderId);
         Task UpdateOrderStatusAsync(Guid orderId, string newState);
         Task<Guid> CreateOrderAsync(OrderCreateDto dto);

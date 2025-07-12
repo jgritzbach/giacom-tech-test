@@ -10,6 +10,7 @@ namespace Order.Data
     {
         Task<IEnumerable<OrderSummary>> GetOrdersAsync();
         Task<IEnumerable<OrderSummary>> GetFailedOrdersAsync();
+        Task<IEnumerable<OrderSummary>> GetCompletedOrdersAsync();
 
         Task<OrderDetail> GetOrderByIdAsync(Guid orderId);
         Task UpdateOrderStatusAsync(Guid orderId, string newState);

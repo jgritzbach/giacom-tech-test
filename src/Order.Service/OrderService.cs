@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Order.Data.Entities;
+using System.Linq;
 
 namespace Order.Service
 {
@@ -26,6 +27,32 @@ namespace Order.Service
         {
             var failedOrders = await _orderRepository.GetFailedOrdersAsync();
             return failedOrders;
+        }
+
+        /// <summary>
+        /// Groups all completed orders by year and month. 
+        /// Counts Profit (price - sum) for each month. 
+        /// </summary>
+        /// <returns>A list of monthly profits as DTOs. </returns>
+        public async Task<List<OrderMonthlyProfitDto>> GetProfitByMonthAsync()
+        {
+
+            var completedOrders = await _orderRepository.GetCompletedOrdersAsync();
+
+            var groupedProfits = completedOrders
+                .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month })
+                .Select(g => new OrderMonthlyProfitDto
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    Profit = g.Sum(o => o.TotalPrice - o.TotalCost)
+                })
+                .OrderBy(x => x.Year)
+                .ThenBy(x => x.Month)
+                .ToList();
+
+            return groupedProfits;
+
         }
 
         public async Task<OrderDetail> GetOrderByIdAsync(Guid orderId)
